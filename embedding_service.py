@@ -5,7 +5,7 @@ from rdkit.Chem import AllChem
 import torch
 from finetune.loader import mol_to_graph_data_obj_simple
 import os
-from typing import Optional, List
+from typing import Optional, List, Literal
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
@@ -22,7 +22,7 @@ class State:
 
     initialized: bool = False
 
-def setup(model_name: str, device: str, batch_size: int) -> None:
+def setup(model_name: str, device: Literal["cpu", "cuda"], batch_size: int) -> None:
     num_layer = 5
     emb_dim = 300
     dropout_ratio = 0.5
