@@ -61,16 +61,21 @@ def mol_to_graph_data_obj_simple(mol):
     # atoms
     num_atom_features = 2   # atom type,  chirality tag
     atom_features_list = []
-    for atom in mol.GetAtoms():
-        atom_feature = [allowable_features['possible_atomic_num_list'].index(
-            atom.GetAtomicNum())] + [allowable_features[
-            'possible_chirality_list'].index(atom.GetChiralTag())]
-        atom_features_list.append(atom_feature)
+    if mol is not None:
+        for atom in mol.GetAtoms():
+            try:
+                atom_feature = [allowable_features['possible_atomic_num_list'].index(
+                    atom.GetAtomicNum())] + [allowable_features[
+                    'possible_chirality_list'].index(atom.GetChiralTag())]
+                atom_features_list.append(atom_feature)
+            except:
+                pass
+
     x = torch.tensor(np.array(atom_features_list), dtype=torch.long)
 
     # bonds
     num_bond_features = 2   # bond type, bond direction
-    if len(mol.GetBonds()) > 0: # mol has bonds
+    if mol is not None and len(mol.GetBonds()) > 0: # mol has bonds
         edges_list = []
         edge_features_list = []
         for bond in mol.GetBonds():
