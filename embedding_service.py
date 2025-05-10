@@ -22,7 +22,7 @@ class State:
 
     initialized: bool = False
 
-def setup(model_name: str, device: Literal["cpu", "cuda"], batch_size: int) -> None:
+def setup(model_name: str, device: Literal["cpu", "cuda"], batch_size: int):
     num_layer = 5
     emb_dim = 300
     dropout_ratio = 0.5
@@ -40,12 +40,13 @@ def setup(model_name: str, device: Literal["cpu", "cuda"], batch_size: int) -> N
     State.model_name = model_name
     State.device = device
     State.batch_size = batch_size
+
     State.initialized = True
 
 
 def process(smiles):
     data_list = []
-    for i, x in enumerate(smiles):
+    for i, x in tqdm(enumerate(smiles), "Preprocessing smiles for encoding"):
         mol = AllChem.MolFromSmiles(x)
         data = mol_to_graph_data_obj_simple(mol)
         data.id = torch.tensor([i])
@@ -54,7 +55,10 @@ def process(smiles):
     data, slices = InMemoryDataset.collate(data_list)
     return data, slices
 
-def encode(smiles: List[str]) -> np.ndarray:
+def encode(input_file: str, output_file: str):
+    with open(input_file, "r") as f:
+        smiles = f.readlines()
+
     if not State.initialized:
         raise RuntimeError("Service is not setup, call 'setup' before 'encode'.")
 
@@ -72,4 +76,5 @@ def encode(smiles: List[str]) -> np.ndarray:
             outputs.append(ret)
     outputs = torch.concat(outputs)
     outputs = outputs.cpu().numpy()
-    return outputs
+    with open(output_file, "wb") as f:
+        np.save(f, outputs)
