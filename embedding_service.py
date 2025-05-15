@@ -73,8 +73,8 @@ def encode(input_file: str, output_file: str):
         for batch in tqdm(dataloader, f"Encoding with {State.model_name}"):
             batch = batch.to(State.device)
             ret = State.model(batch.x, batch.edge_index, batch.edge_attr, batch.batch)
-            outputs.append(ret)
+            outputs.append(ret.cpu())
     outputs = torch.concat(outputs)
-    outputs = outputs.cpu().numpy()
+    outputs = outputs.numpy()
     with open(output_file, "wb") as f:
         np.save(f, outputs)
